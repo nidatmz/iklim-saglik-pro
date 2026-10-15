@@ -53,20 +53,17 @@ document.addEventListener('DOMContentLoaded', () => {
         bultenModal.classList.add('hidden');
     });
 
-    // Modal dışına tıklandığında kapatma
     window.addEventListener('click', (e) => {
         if (e.target === ilkYardimModal) ilkYardimModal.classList.add('hidden');
         if (e.target === bultenModal) bultenModal.classList.add('hidden');
     });
 
-    // Analiz Paneli Kısayolu
     document.querySelector('[data-target="analiz"]').addEventListener('click', function() {
         shortcutBtns.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         document.getElementById('analiz').scrollIntoView({ behavior: 'smooth' });
     });
 
-    // Yazdır Kısayolu
     printShortcutBtn.addEventListener('click', () => {
         window.print();
     });
@@ -308,6 +305,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderHourlyRiskWindows(hourlyData);
         renderMultiCharts(hourlyData);
+
+        // --- n8n Webhook Bildirim Tetikleyicisi ---
+        fetch('https://nidatmz.app.n8n.cloud/webhook/sicaklik-uyari', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                city: city,
+                temp: temp,
+                apparentTemp: apparentTemp,
+                humidity: humidity,
+                riskLevel: riskLevel,
+                profile: profileNames[profile] || profile
+            })
+        }).then(res => console.log("n8n e-posta tetiklendi."))
+          .catch(err => console.log("n8n tetikleme hatası:", err));
     }
 
     function renderHourlyRiskWindows(hourlyData) {
